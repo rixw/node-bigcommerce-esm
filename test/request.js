@@ -1,69 +1,75 @@
 'use strict';
 
-const Request = require('../lib/request'),
-  should = require('chai').should(),
-  nock = require('nock'),
-  HttpsAgent = require('agentkeepalive').HttpsAgent,
-  zlib = require('zlib');
+import HttpsAgent from 'agentkeepalive';
+import * as chai from 'chai';
+import { expect } from 'chai';
+import chaiAsPromised from 'chai-as-promised';
+import nock from 'nock';
+import zlib from 'zlib';
+import Request from '../lib/request.js';
+import exp from 'constants';
+
+chai.use(chaiAsPromised);
 
 describe('Request', () => {
-  const self = { };
-
-  const request = new Request('api.bigcommerce.com', { headers: { 'Content-Type': 'application/json' } });
+  const request = new Request('api.bigcommerce.com', {
+    headers: { 'Content-Type': 'application/json' },
+  });
 
   afterEach(() => nock.cleanAll());
 
   context('given a missing hostname', () => {
     it('should return an error if hostname is missing', () => {
       /* eslint no-new: off */
-      should.Throw(() => {
+      expect(() => {
         new Request();
-      }, Error);
+      }).to.throw(Error);
     });
   });
 
   context('given a 429 status code', () => {
+    let ordersCall;
     beforeEach(() => {
-      self.ordersCall = nock('https://api.bigcommerce.com')
+      ordersCall = nock('https://api.bigcommerce.com')
         .post('/orders')
-        .reply(429, { }, { 'X-Retry-After': 0.1 })
+        .reply(429, {}, { 'X-Retry-After': 0.1 })
         .post('/orders')
-        .reply(200, { });
+        .reply(200, {});
     });
 
-    it('should retry the request', () => {
-      return request.run('post', '/orders')
-        .then(() => self.ordersCall.isDone().should.equal(true));
+    it('should retry the request', async () => {
+      try {
+        const result = await request.run('post', '/orders');
+        expect(result).to.be.an('object');
+        expect(ordersCall.isDone()).to.be.true;
+      } catch (e) {
+        expect.fail('You shall not pass!');
+      }
     });
 
     context('given a failOnLimitReached option', () => {
       const failRequest = new Request('api.bigcommerce.com', {
         headers: { 'Content-Type': 'application/json' },
-        failOnLimitReached: true
+        failOnLimitReached: true,
       });
 
       it('should return an error', () => {
-        return failRequest.run('post', '/orders')
-          .then(() => should.fail('You shall not pass!'))
-          .catch(e => {
-            e.message.should.match(/rate limit/);
-            e.retryAfter.should.equal(0.1);
-          });
+        expect(failRequest.run('post', '/orders'))
+          .to.be.rejectedWith('rate limit')
+          .and.eventually.have.property('retryAfter', 0.1);
       });
     });
   });
 
   context('given a bad request or internal error is returned', () => {
     beforeEach(() => {
-      nock('https://api.bigcommerce.com')
-        .post('/orders')
-        .reply(400, {});
+      nock('https://api.bigcommerce.com').post('/orders').reply(400, {});
     });
 
     it('should return an error', () => {
-      return request.run('post', '/orders', { })
-        .then(() => should.fail('You shall not pass!'))
-        .catch(e => e.message.should.match(/Request returned error code/));
+      expect(request.run('post', '/orders', {})).to.be.rejectedWith(
+        'Request returned error code'
+      );
     });
   });
 
@@ -75,9 +81,9 @@ describe('Request', () => {
     });
 
     it('should return an error', () => {
-      return request.run('post', '/orders', { })
-        .then(() => should.fail('You shall not pass!'))
-        .catch(e => e.message.should.match(/An error has occurred/));
+      expect(request.run('post', '/orders', {})).to.be.rejectedWith(
+        'An error has occurred'
+      );
     });
   });
 
@@ -89,9 +95,9 @@ describe('Request', () => {
     });
 
     it('should return an error', () => {
-      return request.run('post', '/orders', { })
-        .then(() => should.fail('You shall not pass!'))
-        .catch(e => e.message.should.match(/An error has occurred/));
+      expect(request.run('post', '/orders', {})).to.be.rejectedWith(
+        'An error has occurred'
+      );
     });
   });
 
@@ -104,9 +110,9 @@ describe('Request', () => {
     });
 
     it('should return an error', () => {
-      return request.run('post', '/orders', { })
-        .then(() => should.fail('You shall not pass!'))
-        .catch(e => e.message.should.match(/Unexpected token/));
+      expect(request.run('post', '/orders', {})).to.be.rejectedWith(
+        'Unexpected token'
+      );
     });
   });
 
@@ -123,13 +129,19 @@ describe('Request', () => {
     });
 
     it('should return the raw response', () => {
-      return request.run('post', '/orders', { })
-        .then(res => res.should.equal('<xml></xml>'));
+      expect(request.run('post', '/orders', {})).to.eventually.equal(
+        '<xml></xml>'
+      );
     });
 
-    it('should attach the response if the JSON cannot be parsed', () => {
-      return request.run('post', '/customers', { })
-        .catch(err => err.should.have.property('responseBody'));
+    it('should attach the response if the JSON cannot be parsed', async () => {
+      try {
+        const result = await request.run('post', '/customers', {});
+        console.debug(result);
+        expect.fail('You shall not pass!');
+      } catch (e) {
+        expect(e).to.have.property('responseBody');
+      }
     });
   });
 
@@ -141,9 +153,9 @@ describe('Request', () => {
     });
 
     it('should return an error', () => {
-      return request.run('post', '/orders', { })
-        .then(() => should.fail('You shall not pass!'))
-        .catch(e => e.message.should.match(/ECONNRESET/));
+      expect(request.run('post', '/orders', {})).to.be.rejectedWith(
+        'ECONNRESET'
+      );
     });
   });
 
@@ -158,24 +170,20 @@ describe('Request', () => {
         maxSockets: 30,
         maxFreeSockets: 30,
         timeout: 60000,
-        keepAliveTimeout: 30000
-      })
+        freeSocketTimeout: 30000,
+      }),
     });
 
-    return request.run('post', '/orders')
-      .then(res => res.should.be.a('object'));
+    expect(request.run('post', '/orders')).to.eventually.be.an('object');
   });
 
   it('should return a JSON object on success', () => {
     nock('https://api.bigcommerce.com')
       .post('/orders')
       .reply(200, { order: true });
-
-    return request.run('post', '/orders')
-      .then(res => {
-        res.should.be.a('object');
-        res.order.should.equal(true);
-      });
+    expect(request.run('post', '/orders'))
+      .to.eventually.be.an('object')
+      .and.have.property('order', true);
   });
 
   it('should accept and parse a GZIP JSON response', () => {
@@ -188,21 +196,20 @@ describe('Request', () => {
         'X-Transfer-Length': String(zipped.length),
         'Content-Length': undefined,
         'Content-Encoding': 'gzip',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       });
 
     const request = new Request('api.bigcommerce.com', {
       headers: {
         'Content-Type': 'application/json',
-        'Accept-Encoding': 'gzip, deflate'
-      }
+        'Accept-Encoding': 'gzip, deflate',
+      },
     });
 
-    return request.run('post', '/orders')
-      .then(res => {
-        should.exist(res);
-        res.should.have.property('order', true);
-      });
+    expect(request.run('post', '/orders')).to.eventually.have.property(
+      'order',
+      true
+    );
   });
 
   it('should accept and parse a non-GZIP JSON response', () => {
@@ -214,20 +221,19 @@ describe('Request', () => {
       .reply(200, buffer, {
         'X-Transfer-Length': String(buffer.length),
         'Content-Length': undefined,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       });
 
     const request = new Request('api.bigcommerce.com', {
       headers: {
         'Content-Type': 'application/json',
-        'Accept-Encoding': '*'
-      }
+        'Accept-Encoding': '*',
+      },
     });
 
-    return request.run('post', '/orders')
-      .then(res => {
-        should.exist(res);
-        res.should.have.property('order', true);
-      });
+    expect(request.run('post', '/orders')).to.eventually.have.property(
+      'order',
+      true
+    );
   });
 });
