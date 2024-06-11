@@ -1,4 +1,9 @@
 {
   "root": true,
-  "extends": ["conversio"]
+  "extends": [
+    "prettier"
+  ],
+  "ignorePatterns": [
+    "node_modules"
+  ]
 }
