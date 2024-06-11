@@ -16,7 +16,7 @@
   "bugs": "https://github.com/rixw/node-bigcommerce-esm/issues",
   "repository": {
     "type": "git",
-    "url": "https://github.com/rixw/node-bigcommerce-esm.git"
+    "url": "git+https://github.com/rixw/node-bigcommerce-esm.git"
   },
   "license": "MIT",
   "contributors": [
@@ -29,11 +29,13 @@
       "name": "Richard Weaver"
     }
   ],
+  "type": "module",
+  "exports": "./index.js",
   "main": "./lib/bigcommerce",
   "scripts": {
-    "lint": "node_modules/.bin/eslint lib test",
-    "test": "mocha",
-    "publish": "yarn lint && yarn test && changeset version && changeset publish"
+    "lint": "eslint lib test",
+    "publish-package": "yarn lint && yarn test && changeset version && changeset publish",
+    "test": "mocha"
   },
   "dependencies": {
     "chai-as-promised": "^8.0.0",
@@ -51,9 +53,10 @@
     "prettier": "latest",
     "sinon": "^18.0.0"
   },
-  "type": "module",
-  "exports": "./index.js",
   "engines": {
     "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
