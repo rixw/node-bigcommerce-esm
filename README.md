@@ -221,10 +221,10 @@ bigCommerce.delete('/products/' + productId).then(() => {
 
 ## Debugging
 
-We use `debug`, so just run with environment variable DEBUG set to `node-bigcommerce:*`
+We use `debug`, so just run with environment variable DEBUG set to `node-bigcommerce-esm:*`
 
 ```js
-$ DEBUG=node-bigcommerce:* node my_test.js
+$ DEBUG=node-bigcommerce-esm:* node my_test.js
 ```
 
 ## Response Type

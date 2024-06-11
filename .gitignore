@@ -27,8 +27,5 @@ node_modules
 # Users Environment Variables
 .lock-wscript
 
-# Sublime project files
-node-bigcommerce.sublime-*
-
 # Local environment variables
 .env
