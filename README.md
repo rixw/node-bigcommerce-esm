@@ -1,28 +1,27 @@
 # Bigcommerce for Node.js
 
-[![Build Status](https://travis-ci.org/getconversio/node-bigcommerce.svg?branch=master)](https://travis-ci.org/getconversio/node-bigcommerce)
-
-A node module for authentication and use with the BigCommerce API
+A node module for authentication and use with the BigCommerce API. This is a rewrite of [Conversio's original module](https://github.com/getconversio/node-bigcommerce) as an ESM module.
 
 ## Installation
 
 To install the module using NPM:
 
 ```
-npm install node-bigcommerce
+npm install node-bigcommerce-esm
 ```
 
 Or Yarn:
+
 ```
-yarn add node-bigcommerce
+yarn add node-bigcommerce-esm
 ```
 
 ## Setup
 
-Include the 'node-bigcommerce' module within your script and instantiate it with a config:
+Include the 'node-bigcommerce-esm' module within your script and instantiate it with a config:
 
 ```javascript
-const BigCommerce = require('node-bigcommerce');
+import BigCommerce = from 'node-bigcommerce-esm';
 
 const bigCommerce = new BigCommerce({
   logLevel: 'info',
@@ -53,9 +52,10 @@ Set up your Big Commerce as above and pass the following configuration options i
 You will be able to get your Client ID and Secret within your application setup. Below is an example using Express' routes:
 
 ```javascript
-const express = require('express'),
-  router = express.Router(),
-  BigCommerce = require('node-bigcommerce');
+import express from 'express';
+import BigCommerce from 'node-bigcommerce-esm';
+
+const router = express.Router();
 
 const bigCommerce = new BigCommerce({
   clientId: '128ecf542a35ac5270a87dc740918404',
@@ -69,7 +69,6 @@ router.get('/auth', (req, res, next) => {
     .then(data => res.render('integrations/auth', { title: 'Authorized!', data: data })
     .catch(next);
   });
-});
 ```
 
 The `authorize` method requires the query parameters from the request to be passed. These are required to request a permanent access token which will be passed back in the data object.
@@ -96,13 +95,14 @@ From this object you can store the `access_token` for re-use when calling the Bi
 The only configuration element required to use the `verify` method (used for both load and uninstall endpoints) is `secret`. Below is an example using Express' routes:
 
 ```javascript
-const express = require('express'),
-  router = express.Router(),
-  BigCommerce = require('node-bigcommerce');
+import express from 'express';
+import BigCommerce from 'node-bigcommerce-esm';
+
+const router = express.Router();
 
 const bigCommerce = new BigCommerce({
   secret: 'acbd18db4cc2f85cedef654fccc4a4d8',
-  responseType: 'json'
+  responseType: 'json',
 });
 
 router.get('/load', (req, res, next) => {
@@ -145,20 +145,21 @@ To make an API Request you will need the following minimum configuration:
   responseType: 'json'
 }
 ```
+
 Parameters that are added to the url need to be escaped before they are passed as part of the path of any call:
 
 ```javascript
 const path = '/products?name=' + escape('Plain T-Shirt');
 ```
 
-
 ### GET
 
 The `Get` call requires a path: get(path):
 
 ```javascript
-const BigCommerce = require('node-bigcommerce');
+import BigCommerce from 'node-bigcommerce-esm';
 
+const router = express.Router();
 const bigCommerce = new BigCommerce({
   clientId: '128ecf542a35ac5270a87dc740918404'
   accessToken: '9df3b01c60df20d13843841ff0d4482c',
@@ -176,15 +177,15 @@ bigCommerce.get('/products')
 The 'POST' & 'PUT' calls requires a path with optional data to be sent: post(path, data):
 
 ```javascript
-var BigCommerce = require('node-bigcommerce');
+import BigCommerce from 'node-bigcommerce-esm';
 
-var bigCommerce = new BigCommerce({
+const bigCommerce = new BigCommerce({
   clientId: '128ecf542a35ac5270a87dc740918404'
   accessToken: '9df3b01c60df20d13843841ff0d4482c',
   responseType: 'json'
 });
 
-var product = {
+const product = {
   name: 'Plain T-Shirt',
   type: 'physical',
   description: 'This timeless fashion staple will never go out of style!',
@@ -206,17 +207,16 @@ bigCommerce.post('/products', product)
 The 'DELETE' call requires a path: delete(path). A delete call will not return any data and will return a response status of 204.
 
 ```javascript
-const BigCommerce = require('node-bigcommerce');
+import BigCommerce from 'node-bigcommerce-esm';
 
 const bigCommerce = new BigCommerce({
   clientId: '128ecf542a35ac5270a87dc740918404',
-  accessToken: '9df3b01c60df20d13843841ff0d4482c'
+  accessToken: '9df3b01c60df20d13843841ff0d4482c',
 });
 
-bigCommerce.delete('/products/' + productId)
-  .then(() => {
+bigCommerce.delete('/products/' + productId).then(() => {
   // Catch any errors, data will be null
-  });
+});
 ```
 
 ## Debugging
@@ -232,19 +232,18 @@ $ DEBUG=node-bigcommerce:* node my_test.js
 You may require the Big Commerce API to return data in a specific format. To return in either JSON or XML just add a 'responseType' to the config:
 
 ```javascript
-const BigCommerce = require('node-bigcommerce');
+import BigCommerce from 'node-bigcommerce-esm';
 
 const bigCommerce = new BigCommerce({
   logLevel: 'info',
   clientId: '128ecf542a35ac5270a87dc740918404',
   accessToken: '9df3b01c60df20d13843841ff0d4482c',
-  responseType: 'xml'
+  responseType: 'xml',
 });
 
-bigCommerce.post('/products?name=' + escape('Plain T-Shirt'))
-  .then(data => {
+bigCommerce.post('/products?name=' + escape('Plain T-Shirt')).then((data) => {
   // Catch any errors, data will be null
-  });
+});
 ```
 
 Note that when returning in JSON the data will be parsed into an object, XML will not, and will return a string. When no response type is given the type will resort to whatever the BigCommerce default is.
@@ -259,6 +258,4 @@ yarn test
 
 ## Contributing
 
-This module was originally written to be used with [Conversio](https://conversio.com) and is used in a production environment currently. This will ensure that this module is well maintained, bug free and as up to date as possible.
-
-Conversio's developers will continue to make updates as often as required to have a consistently bug free platform, but we are happy to review any feature requests or issues and are accepting constructive pull requests.
+The original module was originally written to be used with [Conversio](https://conversio.com) and is used in a production environment currently. However, as a CJS module I struggled to work with it in an ESM project. This module is a rewrite of the original module to be used as an ESM module. Functionality should be the same, but if you find any issues please raise them in the issues section.
