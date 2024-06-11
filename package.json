@@ -31,7 +31,7 @@
   ],
   "type": "module",
   "exports": "./index.js",
-  "main": "./lib/bigcommerce",
+  "main": "./index.js",
   "scripts": {
     "lint": "eslint lib test",
     "publish-package": "yarn lint && yarn test && changeset version && changeset publish",
