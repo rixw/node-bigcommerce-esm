@@ -1,6 +1,6 @@
 # Bigcommerce for Node.js
 
-A node module for authentication and use with the BigCommerce API. This is a rewrite of [Conversio's original module](https://github.com/getconversio/node-bigcommerce) as an ESM module.
+A node module for authentication and use with the BigCommerce API. This is a partial rewrite of [Conversio's excellent original module](https://github.com/getconversio/node-bigcommerce) for deployment as an ESM module.
 
 ## Installation
 
@@ -258,4 +258,4 @@ yarn test
 
 ## Contributing
 
-The original module was originally written to be used with [Conversio](https://conversio.com) and is used in a production environment currently. However, as a CJS module I struggled to work with it in an ESM project. This module is a rewrite of the original module to be used as an ESM module. Functionality should be the same, but if you find any issues please raise them in the issues section.
+The original module was originally written to be used with [Conversio](https://conversio.com). However, as a CJS module I struggled to work with it in an ESM-based project. This module is a rewrite of the original and released as an ESM module. Functionality should be the same, but if you find any issues please raise them in the issues section.
