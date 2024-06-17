@@ -1,6 +1,6 @@
 {
   "name": "node-bigcommerce-esm",
-  "version": "5.0.1",
+  "version": "5.0.2",
   "description": "A Node ES module for authentication and use with the BigCommerce API",
   "keywords": [
     "bigcommerce",

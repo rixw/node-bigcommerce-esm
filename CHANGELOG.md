@@ -1,5 +1,11 @@
 4.0.0
 
+## 5.0.2
+
+### Patch Changes
+
+- 38e6431: Move testing module to dev dependencies
+
 ## 5.0.1
 
 ### Patch Changes
